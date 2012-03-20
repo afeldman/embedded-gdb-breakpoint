@@ -43,6 +43,6 @@ print 'include installing'
 rootEnv.Install( rootEnv['includedir'], includeheader )
 
 print 'crate program: clang -Wall -v -std=c99 -lbfd -o gdb_breakpoints src/gdb_breakpoints.c'
-gdbBreakpoint = rootEnv.Program( binsource,  binname )
+gdbBreakpoint = rootEnv.Program( binname, binsource )
 print 'install program'
 rootEnv.Install( rootEnv['prefix'], gdbBreakpoint )
