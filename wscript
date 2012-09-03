@@ -36,5 +36,7 @@ def configure(conf):
 def build(bld):
 	bld.recurse('src')
 	bld.recurse('include')
+	bld.recurse('test')
+
 
 

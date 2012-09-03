@@ -1,0 +1,10 @@
+
+def build(bld):
+	print('build project ' + bld.path.abspath())
+        bld(features='c cprogram',
+            source='test.c',
+            target='test',
+            includes     = ['../include/'],
+            cflags       = ['-O2', '-Wall', '-g'],
+	)
+#gcc -Wall -g -I/home/feldmaa/local/include/ -o test example.c
