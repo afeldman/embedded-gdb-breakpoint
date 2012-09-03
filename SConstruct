@@ -33,16 +33,17 @@ rootEnv.Replace(CC = rootEnv['compiler'])
 
 if rootEnv['debug'] == True:
   rootEnv.Append( CDEFINES =['DEBUG'] )
- 
-rootEnv['CFLAGS'] = Split(""" -Wall -std=c99 -lbfd """)
 
-if rootEnv['CC'] == 'clang':
-  rootEnv['CFLAGS'] = '-v'
+rootEnv['CFLAGS'] = Split(""" -W -Wall -std=gnu99 -lbfd -c """)
+rootEnv['CC'] = 'clang'
+
+#if rootEnv['CC'] == 'clang':
+#  rootEnv['CFLAGS'] = '-v'
 
 print 'include installing'
 rootEnv.Install( rootEnv['includedir'], includeheader )
 
-print 'crate program: clang -Wall -v -std=c99 -lbfd -o gdb_breakpoints src/gdb_breakpoints.c'
+print 'crate program: clang -Wall -v -std=c99  -o gdb_breakpoints src/gdb_breakpoints.c'
 gdbBreakpoint = rootEnv.Program( binname, binsource )
 print 'install program'
 rootEnv.Install( rootEnv['prefix'], gdbBreakpoint )
