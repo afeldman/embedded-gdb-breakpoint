@@ -5,6 +5,9 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#define _POSIX_SOURCE
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,8 +20,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   #define FD_DIR "/proc/self/fd/"
 #endif
 
- //2^^64 => 20 digits
- #define FD_FILE_MAX_LEN (sizeof(FD_DIR) + 20)
+/* 2^^64 => 20 digits */
+#define FD_FILE_MAX_LEN (sizeof(FD_DIR) + 20)
 
 #define die(msg, ...) \
   do { fprintf(stderr, msg, ## __VA_ARGS__); exit(1); } while (0)
@@ -34,12 +37,12 @@ int main(int argc, char** argv)
   if (argc < 2)
    die("Usage:\t%s <additional gdb options> ... <programm> \n", argv[0]);
 
-  // get Contents of the breakpoint section
+  /* get Contents of the breakpoint section */
   bfd* _bfd = bfd_openr(argv[argc-1], NULL);
   if (!_bfd)
    { bfd_die("error while constructing bfd object");}
 
-  // load data
+  /* load data */
   if (!bfd_check_format(_bfd, bfd_object))
     {bfd_die("not bfd format"); }
 
@@ -59,19 +62,21 @@ int main(int argc, char** argv)
         bfd_die("bfd_close");
 
 
-    // Write GDB breakpoint commands to a temporary file
+    /* Write GDB breakpoint commands to a temporary file */
 
     FILE *temp = tmpfile();
     if (!temp)
         errno_die("tmpfile");
 
-    for (size_t i = 0; i < contents_size; i += sizeof(void*)) {
-        fprintf(temp, "break *%p\n", *( (void**) (contents+i) ));
+    int i;
+
+    for (i = 0; i < (int)contents_size; i += sizeof(void*)) {
+        fprintf(temp, "break *%p\n", *( (void**) (contents + i) ));
     }
 
     rewind(temp);
 
-    // Execute GDB with that script, along with original args
+    /* Execute GDB with that script, along with original args */
 
     char fd_file_path[FD_FILE_MAX_LEN];
     snprintf(fd_file_path, FD_FILE_MAX_LEN, "%s%d", FD_DIR, fileno(temp));
@@ -83,14 +88,15 @@ int main(int argc, char** argv)
     gdb_args[0] = "gdb";
     gdb_args[1] = "-x";
     gdb_args[2] = fd_file_path;
-    for (size_t i=1; i<argc; i++) {
+
+    for (i=1; i<argc; i++) {
         gdb_args[2+i] = argv[i];
     }
     gdb_args[2+argc] = (char*) NULL;
 
     execvp("gdb", gdb_args);
 
-    // If we get here, then execvp failed.
+    /* If we get here, then execvp failed. */
     errno_die("execvp");
 }
 
