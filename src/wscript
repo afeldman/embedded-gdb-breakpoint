@@ -1,0 +1,10 @@
+APPNAME='gdb_breakpoint'
+
+def build(bld):
+	print('build project ' + bld.path.abspath())
+        bld(features='c cprogram',
+            source='gdb_breakpoint.c',
+            target=APPNAME,
+            lib='bfd',
+            cflags       = ['-O2', '-Wall', '-std=gnu99'],
+	)
