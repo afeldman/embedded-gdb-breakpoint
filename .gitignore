@@ -5,3 +5,4 @@
 #*
 *.o
 custom.py
+test/test
