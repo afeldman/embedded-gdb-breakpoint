@@ -6,5 +6,6 @@ def build(bld):
             target='test',
             includes     = ['../include/'],
             cflags       = ['-O2', '-Wall', '-g'],
+	    install_path = './test/'	    
 	)
-#gcc -Wall -g -I/home/feldmaa/local/include/ -o test example.c
+#gcc -Wall -g -I/usr/local/include/ -o test example.c
