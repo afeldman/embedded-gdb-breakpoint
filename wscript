@@ -23,15 +23,19 @@ def options(opt):
 		print('doxygen option is: ' + opt.options.doxygen)
 	except:
 		pass
+
 	opt.load('compiler_c')
 
 def configure(conf):
 	print('configure project ' + conf.path.abspath())
-	from waflib.Tools.compiler_c import c_compiler
-        c_compiler['win32'] = ['gcc']
-        c_compiler['linux'] = ['gcc']
+
+	conf.env.CC = 'clang'
+
         conf.load('compiler_c')
-        print('set Prefix: ' + conf.options.prefix)
+
+	conf.check_cc(lib='bfd',
+		      uselib_store='BFD', 
+		      mandatory=True)
 
 def build(bld):
 	bld.recurse('src')
