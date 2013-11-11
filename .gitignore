@@ -4,5 +4,6 @@
 *.dblite
 #*
 *.o
+*.app
 custom.py
 test/test
