@@ -9,7 +9,13 @@
 
 import os
 
-VERSION='0.0.1'
+major  = 1
+minor  = 0
+bugfix = 0
+
+name = 'embedded_gdb'
+application = name
+version='%d.%d.%d' % (major, minor, bugfix)
 
 top = '.'
 out = 'build'
@@ -18,16 +24,20 @@ def usage(ctx):
 	print('waf configure build ')
 
 def options(opt):
+	opt.load('compiler_c')
 	try:
-		opt.add_option('--doxygen', action = 'store', default = False, help = 'use doxygen documentation' + '[default: %default]')
-		print('doxygen option is: ' + opt.options.doxygen)
+		opt.add_option('--test',
+			       action='store_true',
+			       default=True,
+			       help='build test application')
+		opt.add_option('--doxygen', 
+			       action = 'store', 
+			       default = False, 
+			       help = 'use doxygen documentation' + '[default: %default]')
 	except:
 		pass
 
-	opt.load('compiler_c')
-
 def configure(conf):
-	print('configure project ' + conf.path.abspath())
 
 	conf.env.CC = 'clang'
 
@@ -38,9 +48,46 @@ def configure(conf):
 		      mandatory=True)
 
 def build(bld):
-	bld.recurse('src')
-	bld.recurse('include')
-	bld.recurse('test')
+	bld(features   = 'c cprogram',
+	    source     = 'src/gdb_breakpoint.c',
+	    target     = name,
+	    includes   = ['include/'],
+	    uselib     = 'BFD',
+	    cflags     = ['-O3', '-Wall','-std=gnu99'],
+	    )
+	
+	bld.install_files('${PREFIX}/include/%s/' % name, bld.path.ant_glob(['**/*.h'], remove=False))
+
+	from waflib import Options
+	if Options.options.test:
+		print('build project ' + bld.path.abspath())
+		bld(features     = 'c cprogram',
+		    source       = 'test/test.c',
+		    target       = 'test.app',
+		    includes     = ['include/'],
+		    cflags       = ['-O2', '-Wall', '-g'],
+		    install_path = '.'
+		    )
+
+	if Options.options.doxygen:
+		doxygen(bld)
+            
+
+# doxygen docs
+from waflib.Build import BuildContext
+class doxy (BuildContext):
+    cmd = "doxygen"
+    fun = "doxygen"
+
+from waflib import Logs
+def doxygen (bld):
+    if not bld.env.DOXYGEN:
+        bld.fatal ("ERROR: cannot build documentation (`doxygen' is not found in $PATH)")
+    Logs.pprint('CYAN', "create documents")
+    bld (features="doxygen",
+         doxyfile='doc/Doxyfile',
+         output_dir = 'doc/html')
+    Logs.pprint('YELLOW', "documents in %s" % bld.env.PREFIX)
 
 
 
