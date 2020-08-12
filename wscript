@@ -30,9 +30,9 @@ def options(opt):
 			       action='store_true',
 			       default=True,
 			       help='build test application')
-		opt.add_option('--doxygen', 
-			       action = 'store', 
-			       default = False, 
+		opt.add_option('--doxygen',
+			       action = 'store',
+			       default = False,
 			       help = 'use doxygen documentation' + '[default: %default]')
 	except:
 		pass
@@ -41,10 +41,10 @@ def configure(conf):
 
 	conf.env.CC = 'clang'
 
-        conf.load('compiler_c')
+	conf.load('compiler_c')
 
 	conf.check_cc(lib='bfd',
-		      uselib_store='BFD', 
+		      uselib_store='BFD',
 		      mandatory=True)
 
 def build(bld):
@@ -55,7 +55,7 @@ def build(bld):
 	    uselib     = 'BFD',
 	    cflags     = ['-O3', '-Wall','-std=gnu99'],
 	    )
-	
+
 	bld.install_files('${PREFIX}/include/%s/' % name, bld.path.ant_glob(['**/*.h'], remove=False))
 
 	from waflib import Options
@@ -71,7 +71,7 @@ def build(bld):
 
 	if Options.options.doxygen:
 		doxygen(bld)
-            
+
 
 # doxygen docs
 from waflib.Build import BuildContext
